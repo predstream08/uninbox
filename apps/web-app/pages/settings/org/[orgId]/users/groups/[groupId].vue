@@ -17,6 +17,8 @@
   const addNewUserButtonLoading = ref(false);
   const showAddNewUser = ref(false);
 
+  const addingUserId = ref('');
+
   const {
     data: groupData,
     pending: groupPending,
@@ -51,6 +53,11 @@
       sortable: true
     },
     {
+      key: 'handle',
+      label: 'Username',
+      sortable: true
+    },
+    {
       key: 'title',
       label: 'Title'
     }
@@ -59,7 +66,7 @@
     publicId: string;
     avatarId: string;
     name: string;
-    nickname: string;
+    handle: string;
     title: string;
     role: string;
     notifications: string;
@@ -75,7 +82,7 @@
           avatarId: member.userProfile?.avatarId || '',
           name:
             member.userProfile?.firstName + ' ' + member.userProfile?.lastName,
-          nickname: member.userProfile?.nickname || '',
+          handle: member.userProfile?.handle || '',
           title: member.userProfile?.title || '',
           role: member.role,
           notifications: member.notifications
@@ -92,6 +99,34 @@
   function showAddUser() {
     getOrgMembersList();
     showAddNewUser.value = true;
+  }
+
+  async function addNewUserToGroup(userProfilePublicId: string) {
+    addingUserId.value = userProfilePublicId;
+    const result = await $trpc.org.userGroups.addUserToGroup.mutate({
+      orgPublicId: orgPublicId,
+      groupPublicId: groupPublicId,
+      userProfilePublicId: userProfilePublicId
+    });
+    if (!result.publicId) {
+      console.log('Error adding user to group');
+    } else {
+      usersInGroup.value.push(userProfilePublicId);
+      // get the user profile from the org members list
+      const member = orgMembersData?.value?.members?.find(
+        (member) => member.profile?.publicId === userProfilePublicId
+      );
+      tableRows.value.push({
+        publicId: member?.profile.publicId || '',
+        avatarId: member?.profile.avatarId || '',
+        name: member?.profile.firstName + ' ' + member?.profile.lastName,
+        handle: member?.profile.handle || '',
+        title: member?.profile.title || '',
+        role: '',
+        notifications: ''
+      });
+    }
+    addingUserId.value = '';
   }
 </script>
 
@@ -165,16 +200,19 @@
           <UnUiTable
             :columns="tableColumns"
             :rows="tableRows"
-            class=""
+            class="text-md"
             :loading="groupPending">
             <template #name-data="{ row }">
-              <div class="py-1 px-4 rounded-full w-fit">
-                <UiUnAvatar
+              <div class="flex flex-row gap-2 items-center">
+                <UnUiAvatar
                   :avatarId="row.avatarId"
                   :name="row.name"
                   size="xs" />
                 <span class="">{{ row.name }}</span>
               </div>
+            </template>
+            <template #handle-data="{ row }">
+              <span class="">@{{ row.handle }}</span>
             </template>
             <template #title-data="{ row }">
               <div class="w-fit">
@@ -216,8 +254,9 @@
             </template>
           </UnUiTable>
           <UnUiButton
-            label="Add user to group"
-            size="md"
+            label="Add more users to the group"
+            size="sm"
+            variant="outline"
             @click="showAddUser()"
             v-if="!showAddNewUser" />
           <div
@@ -231,32 +270,48 @@
           <div
             class="grid grid-cols-2 gap-4 w-full"
             v-if="showAddNewUser && !orgMembersPending">
-            <div
-              v-for="member of orgMembersData?.members"
-              class="flex flex-row gap-4 bg-base-2 p-8 rounded-xl items-center">
-              <UnUiAvatar
-                :avatar-id="member.profile?.avatarId || ''"
-                :name="
-                  member.profile?.firstName + ' ' + member.profile?.lastName
-                "
-                size="lg" />
-              <div class="flex flex-col gap-2">
-                <span class="text-xl font-display">
-                  {{
-                    member.profile?.firstName + ' ' + member.profile?.lastName
-                  }}
-                </span>
-                <span class="">
-                  {{ member.profile?.title }}
-                </span>
+            <template v-for="member of orgMembersData?.members">
+              <div
+                class="flex flex-row justify-between bg-base-2 p-4 rounded-xl items-center"
+                v-if="!usersInGroup.includes(member.profile?.publicId)">
+                <div class="flex flex-row gap-4 items-center">
+                  <UnUiAvatar
+                    :avatar-id="member.profile?.avatarId || ''"
+                    :name="
+                      member.profile?.firstName + ' ' + member.profile?.lastName
+                    "
+                    size="sm" />
+                  <div class="flex flex-col gap-0">
+                    <div class="flex flex-row gap-2 items-center">
+                      <span class="text-xl font-display">
+                        {{
+                          member.profile?.firstName +
+                          ' ' +
+                          member.profile?.lastName
+                        }}
+                      </span>
+                      <UnUiTooltip
+                        text="Organization Admin"
+                        v-if="member.role === 'admin'">
+                        <icon
+                          name="ph:crown"
+                          class="text-yellow-8" />
+                      </UnUiTooltip>
+                    </div>
+                    <span class=""> @{{ member.profile?.handle }} </span>
+                    <span class="">
+                      {{ member.profile?.title }}
+                    </span>
+                  </div>
+                </div>
+                <UnUiButton
+                  label="Add to group"
+                  size="sm"
+                  @click="addNewUserToGroup(member.profile?.publicId)"
+                  :loading="addingUserId === member.profile?.publicId"
+                  :disabled="usersInGroup.includes(member.profile?.publicId)" />
               </div>
-              <div class="flex flex-col gap-2">
-                <span
-                  class="uppercase text-xs py-1 px-4 bg-base-6 rounded-full">
-                  {{ member.role }}
-                </span>
-              </div>
-            </div>
+            </template>
           </div>
         </div>
       </div>
