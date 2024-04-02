@@ -24,7 +24,7 @@
 
   const buttonLabel = ref('Create New Email Address');
   const buttonLoading = ref(false);
-  const emit = defineEmits(['close']);
+  const emit = defineEmits(['close', 'openExternal']);
 
   const formValid = computed(() => {
     if (isPro.value === false) {
@@ -235,6 +235,11 @@
     setTimeout(() => {
       emit('close');
     }, 1000);
+  }
+
+  function openExternalIdentity() {
+    emit('openExternal');
+    emit('close');
   }
 
   const multipleDestinationsSelected = computed(() => {
@@ -466,14 +471,22 @@
         You can only deliver messages to one single destination on your current
         plan
       </span>
-      <UnUiButton
-        icon="i-ph-plus"
-        :label="buttonLabel"
-        :loading="buttonLoading"
-        :disabled="!formValid"
-        variant="solid"
-        class="mt-2"
-        @click="createNewEmailIdentity()" />
+      <div class="grid grid-cols-2 gap-4">
+        <UnUiButton
+          icon="i-ph-link"
+          label="Add external email instead"
+          variant="outline"
+          class="mt-2"
+          @click="openExternalIdentity()" />
+        <UnUiButton
+          icon="i-ph-plus"
+          :label="buttonLabel"
+          :loading="buttonLoading"
+          :disabled="!formValid"
+          variant="solid"
+          class="mt-2"
+          @click="createNewEmailIdentity()" />
+      </div>
     </div>
   </div>
 </template>
