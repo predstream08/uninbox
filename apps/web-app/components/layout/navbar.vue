@@ -13,7 +13,6 @@
     useState
   } from '#imports';
   const colorMode = useColorMode();
-  const route = useRoute();
   const toggleColorMode = () => {
     colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
   };
@@ -269,19 +268,10 @@
       timeout: 1000
     });
   }
-
-  const isCollapsed = ref(true);
-  watch(
-    () => route.path,
-    () => {
-      isCollapsed.value = true;
-    }
-  );
 </script>
 <template>
   <div
-    class="bg-base-2 border-base-7 fixed z-[40] flex w-full flex-col gap-4 border-r p-4 transition-all duration-300 lg:relative lg:h-full lg:max-h-full lg:w-[320px] lg:justify-between"
-    :class="isCollapsed ? 'h-[72px] overflow-hidden' : 'h-fit'">
+    class="bg-base-2 border-base-7 flex h-full max-h-full w-[320px] flex-col justify-between gap-4 border-r p-4 transition-all duration-300">
     <UnUiModal v-model="showLogoutModal">
       <template #header>
         <span class="">Logout</span>
@@ -345,15 +335,6 @@
     <div class="flex flex-col gap-4">
       <div class="flex flex-row items-center justify-between pl-2 pr-2">
         <span class="font-display leading-none">UnInbox</span>
-        <div class="flex flex-row items-center gap-4">
-          <UnUiButton
-            square
-            size="lg"
-            icon="i-ph-list"
-            variant="ghost"
-            class="lg:hidden"
-            @click="isCollapsed = !isCollapsed" />
-        </div>
       </div>
       <UnUiVerticalNavigation :links="navLinks">
         <template #default="{ link }">
