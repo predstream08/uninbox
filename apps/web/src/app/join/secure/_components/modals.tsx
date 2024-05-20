@@ -15,7 +15,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
 import { api } from '@/src/lib/trpc';
 import useLoading from '@/src/hooks/use-loading';
 import { startRegistration } from '@simplewebauthn/browser';
-import { Check, Plus, Fingerprint, HelpCircle } from 'lucide-react';
+import { Check, Plus, Fingerprint, Question } from '@phosphor-icons/react';
 import TogglePasswordBox from '@/src/components/toggle-password';
 import { useDebounce } from '@uidotdev/usehooks';
 import { toDataURL } from 'qrcode';
@@ -25,7 +25,7 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot
-} from '@/src/components/input-otp';
+} from '@/src/components/shadcn-ui/input-otp';
 import { downloadAsFile } from '@/src/lib/utils';
 import Image from 'next/image';
 
@@ -294,7 +294,7 @@ const PasswordModalStep1 = ({
                 it
               </Text>
             }>
-            <HelpCircle size={14} />
+            <Question size={14} />
           </Tooltip>
         </Flex>
       )}
