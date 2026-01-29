@@ -53,7 +53,6 @@ export const ratelimiter = ({
       if (!limiter) {
         limiter = env.UNKEY_ROOT_KEY
           ? new Ratelimit({
-              async: true,
               namespace,
               limit,
               duration,

@@ -62,7 +62,7 @@
     "immer": "^10.1.1",
     "input-otp": "^1.2.4",
     "jotai": "^2.9.3",
-    "next": "14.2.6",
+    "next": "14.2.35",
     "next-client-cookies": "^1.1.1",
     "next-runtime-env": "^3.2.2",
     "next-themes": "^0.3.0",
